@@ -1,0 +1,350 @@
+﻿@page "/"
+@using System.IO;
+@using System.Collections.Generic;
+@using System;
+
+<style>
+    .index-container {
+        height: 95vh;
+        width: 100%;
+    }
+
+    .filter-container {
+        height: 10vh;
+        width: 100%;
+        display: flex;
+    }
+
+    .filter {
+        height: 10vh;
+        width: 20%;
+        margin-left: 2.5%;
+        margin-right: 2.5%;
+    }
+
+    .main-container {
+        height: 70vh;
+        width: 95%;
+        margin: auto;
+    }
+
+    MudSelect {
+        height: 8vh;
+        margin-bottom: 2vh;
+        padding: 1em;
+        color: black;
+        font-size: 1em;
+        font-weight: 500;
+        font-family: opensans-condensed-light;
+        width: 80%;
+        margin-left: 10%;
+        margin-right: 10%;
+        line-height: 8vh;
+    }
+
+    iframe {
+        height: inherit;
+        width: inherit;
+        margin-left: 2.5%;
+    }
+
+    .button-div {
+        height: 5vh;
+        width: 50%;
+        margin: auto;
+    }
+
+    .button-search {
+        background-color: #000000;
+        font-size: 1em;
+        text-align: center;
+        color: white;
+    }
+</style>
+
+<div class="index-container">
+    <div class="filter-container">
+        <div class="filter">
+            <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Vendors" @bind-Value="Vendorvalue" @bind-SelectedValues="Vendoroptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetVendors))" Label="Vendors" AdornmentIcon="@Icons.Material.Filled.Search">
+                @foreach (var vendor in Vendors)
+                {
+                    <MudSelectItem T="string" Value="@vendor">@vendor</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+        <div class="filter">
+            <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Dates" @bind-Value="Datevalue" @bind-SelectedValues="Dateoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetDates))" Label="Dates" AdornmentIcon="@Icons.Material.Filled.Search">
+                @foreach (var date in Dates)
+                {
+                    <MudSelectItem T="string" Value="@date">@Dates</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+        <div class="filter">
+            <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Subscriptions" @bind-Value="Subscriptionvalue" @bind-SelectedValues="Subscriptionoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetSubscriptions))" Label="Subscriptions" AdornmentIcon="@Icons.Material.Filled.Search">
+                @foreach (var subscription in Subscriptions)
+                {
+                    <MudSelectItem T="string" Value="@subscription">@subscription</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+        <div class="filter">
+            <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Reource Groups" @bind-Value="ResourceGroupvalue" @bind-SelectedValues="ResourceGroupoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetResourceGroups))" Label="Resource Groups" AdornmentIcon="@Icons.Material.Filled.Search">
+                @foreach (var resourcegroup in ResourceGroups)
+                {
+                    <MudSelectItem T="string" Value="@resourcegroup">@resourcegroup</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+    </div>
+    <div class="button-div">
+        <input type="button" class="button-search" value="Filter" @onclick="BeginFilter" />
+    </div>
+    <div class="main-container">
+        <iframe src="@link"></iframe>
+    </div>
+</div>
+
+@code{
+
+    private string link = "https://app.powerbi.com/reportEmbed?reportId=4404ecbd-708d-497a-8164-a3dc11260ca9&autoAuth=true&ctid=92454335-564e-4ccf-b0b0-24445b8c03f7&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly93YWJpLW5vcnRoLWV1cm9wZS1pLXByaW1hcnktcmVkaXJlY3QuYW5hbHlzaXMud2luZG93cy5uZXQvIn0%3D&pageName=ReportSectionc15b8c90aaa4eb154d3b";
+    private string mainfilter;
+    private string Vendorvalue { get; set; } = "Select Vendor";
+    private string Subscriptionvalue { get; set; } = "Select Subscription";
+    private string Datevalue { get; set; } = "Select Date";
+    private string ResourceGroupvalue { get; set; } = "Select Resource Group";
+
+    private IEnumerable<string> Vendoroptions { get; set; } = new HashSet<string>();
+    private IEnumerable<string> Dateoptions { get; set; } = new HashSet<string>();
+    private IEnumerable<string> Subscriptionoptions { get; set; } = new HashSet<string>();
+    private IEnumerable<string> ResourceGroupoptions { get; set; } = new HashSet<string>();
+
+
+    private string selectedVendorsString;
+    private string selectedResourceGroupsString;
+    private string selectedSubscriptionsString;
+    private string selectedDatesString;
+
+    private List<string> selectedVendors = new List<string>();
+    private List<string> selectedResourceGroups = new List<string>();
+    private List<string> selectedSubscriptions = new List<string>();
+    private List<string> selectedDates = new List<string>();
+
+    private string[] Vendors =
+    {
+        "AWS", "Azure", "Azure CSP"
+    };
+
+    private string[] Dates =
+    {
+        "Wednesday, 27 December 2017", "Wednesday, 03 January 2018", "Tuesday, 19 February 2019"
+    };
+    private string[] Subscriptions =
+    {
+        "AWS New", "48 Software", "Group IT"
+    };
+    private string[] ResourceGroups =
+    {
+        "$system", "1Password", "Alerts"
+    };
+
+    private string vendorfilter;
+    private string datefilter;
+    private string subscriptionfilter;
+    private string resourcegroupfilter;
+    private string GetVendors(List<string>selectedValues)
+    {
+        selectedVendorsString = string.Join(", ", selectedValues);
+        selectedVendors = selectedValues;
+        return $"{selectedVendorsString}";
+    }
+    private string GetResourceGroups(List<string> selectedValues)
+    {
+        selectedResourceGroupsString = string.Join(", ", selectedValues);
+        selectedResourceGroups = selectedValues;
+        return $"{selectedResourceGroupsString}";
+    }
+    private string GetSubscriptions(List<string>selectedValues)
+    {
+        selectedSubscriptionsString = string.Join(", ", selectedValues);
+        selectedSubscriptions = selectedValues;
+        return $"{selectedSubscriptionsString}";
+
+    }
+
+    private string GetDates(List<string> selectedValues)
+    {
+        selectedDatesString = string.Join(", ", selectedValues);
+        selectedDates = selectedValues;
+        return $"{selectedDatesString}";
+    }
+
+    private void BeginFilter()
+    {
+        if (selectedVendors.Count() != 0)
+        {
+            buildVendorFilter();
+            mainfilter = mainfilter+vendorfilter;
+        }
+        if (selectedDates.Count() != 0)
+        {
+            buildDateFilter();
+            if (selectedVendors.Count() != 0)
+            {
+                mainfilter = mainfilter +" and "+ datefilter;
+            }
+            else
+            {
+                mainfilter = mainfilter + datefilter;
+            }
+
+        }
+        if (selectedResourceGroups.Count() != 0)
+        {
+            buildResourceGroupFilter();
+            if (selectedDates.Count() != 0 || selectedVendors.Count()!=0)
+            {
+                mainfilter = mainfilter + " and "+resourcegroupfilter;
+            }
+            else
+            {
+                mainfilter = mainfilter + resourcegroupfilter;
+
+            }
+
+        }
+        if (selectedSubscriptions.Count() != 0)
+        {
+            buildSubscriptionFilter();
+            if (selectedDates.Count()!=0 || selectedVendors.Count()!=0 || selectedResourceGroups.Count() != 0)
+            {
+                mainfilter = mainfilter + " and "+ subscriptionfilter;
+
+            }
+            else
+            {
+                mainfilter = mainfilter + subscriptionfilter;
+
+            }
+
+        }
+        Console.WriteLine(vendorfilter);
+        Console.WriteLine(datefilter);
+        Console.WriteLine(resourcegroupfilter);
+        Console.WriteLine(subscriptionfilter);
+
+        link = "https://app.powerbi.com/reportEmbed?reportId=4404ecbd-708d-497a-8164-a3dc11260ca9&autoAuth=true&ctid=92454335-564e-4ccf-b0b0-24445b8c03f7&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly93YWJpLW5vcnRoLWV1cm9wZS1pLXByaW1hcnktcmVkaXJlY3QuYW5hbHlzaXMud2luZG93cy5uZXQvIn0%3D&pageName=ReportSectionc15b8c90aaa4eb154d3b?filter="+mainfilter;
+        Console.WriteLine(link);
+    }
+
+    private void buildVendorFilter()
+    {
+        if (selectedVendors.Count() == Vendors.Length)
+        {
+            vendorfilter = "Subscription/Vendor eq 'All'";
+        }
+        else if (selectedVendors.Count() == 1)
+        {
+            vendorfilter = "Subscription/Vendor eq '"+selectedVendors[0]+"'";
+        }
+        else
+        {
+            vendorfilter = "Subscription/Vendor in (";
+
+            for (int i = 0; i < selectedVendors.Count; i++)
+            {
+                if (i == selectedVendors.Count - 1)
+                {
+                    vendorfilter = vendorfilter + " '" + selectedVendors[i]+"')";
+                }
+                else
+                {
+                    vendorfilter = vendorfilter + " '" + selectedVendors[i] + "',";
+                }
+            }
+        }
+    }
+
+    private void buildDateFilter()
+    {
+        if (selectedDates.Count() == Dates.Length)
+        {
+            datefilter = "Dates/Date eq 'All'";
+        }
+        else if (selectedDates.Count() == 1)
+        {
+            datefilter = "Dates/Date eq '" + selectedDates[0] + "'";
+        }
+        else
+        {
+            datefilter = "Dates/Date in (";
+
+            for (int i = 0; i < selectedDates.Count; i++)
+            {
+                if (i == selectedDates.Count - 1)
+                {
+                    datefilter = datefilter + " '" + selectedDates[i] + "')";
+                }
+                else
+                {
+                    datefilter = datefilter + " '" + selectedDates[i] + "',";
+                }
+            }
+        }
+    }
+    private void buildSubscriptionFilter()
+    {
+        if (selectedSubscriptions.Count() == Subscriptions.Length)
+        {
+            subscriptionfilter = "Subscription/SubscriptionName eq 'All'";
+        }
+        else if (selectedSubscriptions.Count() == 1)
+        {
+            subscriptionfilter = "Subscription/SubscriptionName eq '" + selectedSubscriptions[0] + "'";
+        }
+        else
+        {
+            subscriptionfilter = "Subscription/SubscriptionName in (";
+
+            for (int i = 0; i < selectedSubscriptions.Count; i++)
+            {
+                if (i == selectedSubscriptions.Count - 1)
+                {
+                    subscriptionfilter = subscriptionfilter + " '" + selectedSubscriptions[i] + "')";
+                }
+                else
+                {
+                    subscriptionfilter = subscriptionfilter + " '" + selectedSubscriptions[i] + "',";
+                }
+            }
+        }
+    }
+    private void buildResourceGroupFilter()
+    {
+        if (selectedResourceGroups.Count() == ResourceGroups.Length)
+        {
+            resourcegroupfilter = "ResourceGroup/ResourceGroupName eq 'All'";
+        }
+        else if (selectedResourceGroups.Count() == 1)
+        {
+            resourcegroupfilter = "ResourceGroup/ResourceGroupName eq '" + selectedResourceGroups[0] + "'";
+        }
+        else
+        {
+            resourcegroupfilter = "ResourceGroup/ResourceGroupName in (";
+
+            for (int i = 0; i < selectedResourceGroups.Count; i++)
+            {
+                if (i == selectedResourceGroups.Count - 1)
+                {
+                    resourcegroupfilter = resourcegroupfilter + " '" + selectedResourceGroups[i] + "')";
+                }
+                else
+                {
+                    resourcegroupfilter = resourcegroupfilter + " '" + selectedResourceGroups[i] + "',";
+                }
+            }
+        }
+    }
+
+}
