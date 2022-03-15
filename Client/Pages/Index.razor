@@ -1,8 +1,8 @@
 ﻿@page "/"
-@using System.IO;
-@using System.Collections.Generic;
-@using System;
-
+@using System.IO
+@using System.Collections.Generic
+@using System
+@using System.Text
 <style>
     .index-container {
         height: 95vh;
@@ -76,7 +76,7 @@
             <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Dates" @bind-Value="Datevalue" @bind-SelectedValues="Dateoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetDates))" Label="Dates" AdornmentIcon="@Icons.Material.Filled.Search">
                 @foreach (var date in Dates)
                 {
-                    <MudSelectItem T="string" Value="@date">@Dates</MudSelectItem>
+                    <MudSelectItem T="string" Value="@date">@date</MudSelectItem>
                 }
             </MudSelect>
         </div>
@@ -98,6 +98,7 @@
         </div>
     </div>
     <div class="button-div">
+        <input type="button" class="button-search" value="Clear" @onclick="Clear" />
         <input type="button" class="button-search" value="Filter" @onclick="BeginFilter" />
     </div>
     <div class="main-container">
@@ -107,17 +108,19 @@
 
 @code{
 
-    private string link = "https://app.powerbi.com/reportEmbed?reportId=4404ecbd-708d-497a-8164-a3dc11260ca9&autoAuth=true&ctid=92454335-564e-4ccf-b0b0-24445b8c03f7&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly93YWJpLW5vcnRoLWV1cm9wZS1pLXByaW1hcnktcmVkaXJlY3QuYW5hbHlzaXMud2luZG93cy5uZXQvIn0%3D&pageName=ReportSectionc15b8c90aaa4eb154d3b";
+    public string mainlink = "https://app.powerbi.com/reportEmbed?reportId=4404ecbd-708d-497a-8164-a3dc11260ca9&autoAuth=true&ctid=92454335-564e-4ccf-b0b0-24445b8c03f7&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly93YWJpLW5vcnRoLWV1cm9wZS1pLXByaW1hcnktcmVkaXJlY3QuYW5hbHlzaXMud2luZG93cy5uZXQvIn0%3D&pageName=ReportSectionc15b8c90aaa4eb154d3b";
+    private string link;
     private string mainfilter;
+    private string filterstart = "&$filter=";
     private string Vendorvalue { get; set; } = "Select Vendor";
     private string Subscriptionvalue { get; set; } = "Select Subscription";
     private string Datevalue { get; set; } = "Select Date";
     private string ResourceGroupvalue { get; set; } = "Select Resource Group";
 
-    private IEnumerable<string> Vendoroptions { get; set; } = new HashSet<string>();
-    private IEnumerable<string> Dateoptions { get; set; } = new HashSet<string>();
-    private IEnumerable<string> Subscriptionoptions { get; set; } = new HashSet<string>();
-    private IEnumerable<string> ResourceGroupoptions { get; set; } = new HashSet<string>();
+    private IEnumerable<string> Vendoroptions; 
+    private IEnumerable<string> Dateoptions; 
+    private IEnumerable<string> Subscriptionoptions; 
+    private IEnumerable<string> ResourceGroupoptions; 
 
 
     private string selectedVendorsString;
@@ -125,10 +128,10 @@
     private string selectedSubscriptionsString;
     private string selectedDatesString;
 
-    private List<string> selectedVendors = new List<string>();
-    private List<string> selectedResourceGroups = new List<string>();
-    private List<string> selectedSubscriptions = new List<string>();
-    private List<string> selectedDates = new List<string>();
+    private List<string> selectedVendors; 
+    private List<string> selectedResourceGroups;
+    private List<string> selectedSubscriptions;
+    private List<string> selectedDates;
 
     private string[] Vendors =
     {
@@ -137,7 +140,7 @@
 
     private string[] Dates =
     {
-        "Wednesday, 27 December 2017", "Wednesday, 03 January 2018", "Tuesday, 19 February 2019"
+        "27/12/2017", "03/01/2018", "19/01/2019"
     };
     private string[] Subscriptions =
     {
@@ -152,21 +155,49 @@
     private string datefilter;
     private string subscriptionfilter;
     private string resourcegroupfilter;
+
+    protected override async Task OnInitializedAsync()
+    {
+        mainfilter = "";
+        link = mainlink;
+        selectedVendorsString = "";
+        selectedResourceGroupsString="";
+        selectedSubscriptionsString="";
+        selectedDatesString="";
+
+        Vendoroptions  = new HashSet<string>();
+        Dateoptions = new HashSet<string>();
+        Subscriptionoptions = new HashSet<string>();
+        ResourceGroupoptions  = new HashSet<string>();
+
+        selectedVendors = new List<string>();
+        selectedResourceGroups = new List<string>();
+        selectedSubscriptions = new List<string>();
+        selectedDates = new List<string>();
+
+        vendorfilter = "";
+        datefilter ="";
+        subscriptionfilter="";
+        resourcegroupfilter="";
+
+        await Task.Delay(0);
+    }
+
     private string GetVendors(List<string>selectedValues)
     {
-        selectedVendorsString = string.Join(", ", selectedValues);
+        selectedVendorsString = string.Join(",", selectedValues);
         selectedVendors = selectedValues;
         return $"{selectedVendorsString}";
     }
     private string GetResourceGroups(List<string> selectedValues)
     {
-        selectedResourceGroupsString = string.Join(", ", selectedValues);
+        selectedResourceGroupsString = string.Join(",%20", selectedValues);
         selectedResourceGroups = selectedValues;
         return $"{selectedResourceGroupsString}";
     }
     private string GetSubscriptions(List<string>selectedValues)
     {
-        selectedSubscriptionsString = string.Join(", ", selectedValues);
+        selectedSubscriptionsString = string.Join(",%20", selectedValues);
         selectedSubscriptions = selectedValues;
         return $"{selectedSubscriptionsString}";
 
@@ -174,7 +205,7 @@
 
     private string GetDates(List<string> selectedValues)
     {
-        selectedDatesString = string.Join(", ", selectedValues);
+        selectedDatesString = string.Join(",%20", selectedValues);
         selectedDates = selectedValues;
         return $"{selectedDatesString}";
     }
@@ -191,7 +222,7 @@
             buildDateFilter();
             if (selectedVendors.Count() != 0)
             {
-                mainfilter = mainfilter +" and "+ datefilter;
+                mainfilter = mainfilter + "%20and%20" + datefilter;
             }
             else
             {
@@ -204,7 +235,7 @@
             buildResourceGroupFilter();
             if (selectedDates.Count() != 0 || selectedVendors.Count()!=0)
             {
-                mainfilter = mainfilter + " and "+resourcegroupfilter;
+                mainfilter = mainfilter + "%20and%20" + resourcegroupfilter;
             }
             else
             {
@@ -218,13 +249,12 @@
             buildSubscriptionFilter();
             if (selectedDates.Count()!=0 || selectedVendors.Count()!=0 || selectedResourceGroups.Count() != 0)
             {
-                mainfilter = mainfilter + " and "+ subscriptionfilter;
+                mainfilter = mainfilter + "%20and%20" + subscriptionfilter;
 
             }
             else
             {
                 mainfilter = mainfilter + subscriptionfilter;
-
             }
 
         }
@@ -232,8 +262,8 @@
         Console.WriteLine(datefilter);
         Console.WriteLine(resourcegroupfilter);
         Console.WriteLine(subscriptionfilter);
-
-        link = "https://app.powerbi.com/reportEmbed?reportId=4404ecbd-708d-497a-8164-a3dc11260ca9&autoAuth=true&ctid=92454335-564e-4ccf-b0b0-24445b8c03f7&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly93YWJpLW5vcnRoLWV1cm9wZS1pLXByaW1hcnktcmVkaXJlY3QuYW5hbHlzaXMud2luZG93cy5uZXQvIn0%3D&pageName=ReportSectionc15b8c90aaa4eb154d3b?filter="+mainfilter;
+        Console.WriteLine(mainfilter);
+        link = link + filterstart + mainfilter;
         Console.WriteLine(link);
     }
 
@@ -241,25 +271,25 @@
     {
         if (selectedVendors.Count() == Vendors.Length)
         {
-            vendorfilter = "Subscription/Vendor eq 'All'";
+            vendorfilter = "Subscription%2FVendor%20eq%20%27All%27";
         }
         else if (selectedVendors.Count() == 1)
         {
-            vendorfilter = "Subscription/Vendor eq '"+selectedVendors[0]+"'";
+            vendorfilter = "Subscription%2FVendor%20eq%20%27" + selectedVendors[0]+ "%27";
         }
         else
         {
-            vendorfilter = "Subscription/Vendor in (";
+            vendorfilter = "Subscription%2FVendor%20in%20(";
 
             for (int i = 0; i < selectedVendors.Count; i++)
             {
                 if (i == selectedVendors.Count - 1)
                 {
-                    vendorfilter = vendorfilter + " '" + selectedVendors[i]+"')";
+                    vendorfilter = vendorfilter + "%27" + selectedVendors[i]+ "%27)";
                 }
                 else
                 {
-                    vendorfilter = vendorfilter + " '" + selectedVendors[i] + "',";
+                    vendorfilter = vendorfilter + "%27" + selectedVendors[i] + "%27,";
                 }
             }
         }
@@ -269,25 +299,25 @@
     {
         if (selectedDates.Count() == Dates.Length)
         {
-            datefilter = "Dates/Date eq 'All'";
+            datefilter = "Dates%2FDate%20eq%20%27All%27";
         }
         else if (selectedDates.Count() == 1)
         {
-            datefilter = "Dates/Date eq '" + selectedDates[0] + "'";
+            datefilter = "Dates%2FDate%20eq%20%27" + selectedDates[0] + "%27";
         }
         else
         {
-            datefilter = "Dates/Date in (";
+            datefilter = "Dates%2FDate%20in%20(";
 
             for (int i = 0; i < selectedDates.Count; i++)
             {
                 if (i == selectedDates.Count - 1)
                 {
-                    datefilter = datefilter + " '" + selectedDates[i] + "')";
+                    datefilter = datefilter + "%27" + selectedDates[i] + "%27)";
                 }
                 else
                 {
-                    datefilter = datefilter + " '" + selectedDates[i] + "',";
+                    datefilter = datefilter + "%27" + selectedDates[i] + "%27,";
                 }
             }
         }
@@ -296,25 +326,25 @@
     {
         if (selectedSubscriptions.Count() == Subscriptions.Length)
         {
-            subscriptionfilter = "Subscription/SubscriptionName eq 'All'";
+            subscriptionfilter = "Subscription%2FSubscriptionName%20eq%20%27All%27";
         }
         else if (selectedSubscriptions.Count() == 1)
         {
-            subscriptionfilter = "Subscription/SubscriptionName eq '" + selectedSubscriptions[0] + "'";
+            subscriptionfilter = "Subscription%2FSubscriptionName%20eq%20%27" + selectedSubscriptions[0] + "%27";
         }
         else
         {
-            subscriptionfilter = "Subscription/SubscriptionName in (";
+            subscriptionfilter = "Subscription%2FSubscriptionName%20in%20(";
 
             for (int i = 0; i < selectedSubscriptions.Count; i++)
             {
                 if (i == selectedSubscriptions.Count - 1)
                 {
-                    subscriptionfilter = subscriptionfilter + " '" + selectedSubscriptions[i] + "')";
+                    subscriptionfilter = subscriptionfilter + "%27" + selectedSubscriptions[i] + "%27)";
                 }
                 else
                 {
-                    subscriptionfilter = subscriptionfilter + " '" + selectedSubscriptions[i] + "',";
+                    subscriptionfilter = subscriptionfilter + "%27" + selectedSubscriptions[i] + "%27,";
                 }
             }
         }
@@ -323,28 +353,32 @@
     {
         if (selectedResourceGroups.Count() == ResourceGroups.Length)
         {
-            resourcegroupfilter = "ResourceGroup/ResourceGroupName eq 'All'";
+            resourcegroupfilter = "ResourceGroup%2FResourceGroupName%20eq%20%27All%27";
         }
         else if (selectedResourceGroups.Count() == 1)
         {
-            resourcegroupfilter = "ResourceGroup/ResourceGroupName eq '" + selectedResourceGroups[0] + "'";
+            resourcegroupfilter = "ResourceGroup%2FResourceGroupName%20eq%20%27" + selectedResourceGroups[0] + "%27";
         }
         else
         {
-            resourcegroupfilter = "ResourceGroup/ResourceGroupName in (";
+            resourcegroupfilter = "ResourceGroup%2FResourceGroupName%20in%20(";
 
             for (int i = 0; i < selectedResourceGroups.Count; i++)
             {
                 if (i == selectedResourceGroups.Count - 1)
                 {
-                    resourcegroupfilter = resourcegroupfilter + " '" + selectedResourceGroups[i] + "')";
+                    resourcegroupfilter = resourcegroupfilter + "%27" + selectedResourceGroups[i] + "%27)";
                 }
                 else
                 {
-                    resourcegroupfilter = resourcegroupfilter + " '" + selectedResourceGroups[i] + "',";
+                    resourcegroupfilter = resourcegroupfilter + "%27" + selectedResourceGroups[i] + "%27,";
                 }
             }
         }
     }
 
+    private async Task Clear()
+    {
+        await OnInitializedAsync();
+    }
 }
