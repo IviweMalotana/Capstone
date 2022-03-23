@@ -3,6 +3,7 @@
 @using System.Collections.Generic
 @using System
 @using System.Text
+
 <style>
     .index-container {
         height: 95vh;
@@ -10,62 +11,75 @@
     }
 
     .filter-container {
+        padding-top: 2.5vh;
         height: 10vh;
         width: 100%;
         display: flex;
     }
 
+    .button-div {
+        height: 5vh;
+        width: 95%;
+        margin-right: 2.5%;
+        margin-left: 2.5%;
+        margin-top: 5vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .main-container {
+        height: 75vh;
+        width: 95%;
+        margin-left: 2.5%;
+        margin-right: 2.5%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     .filter {
         height: 10vh;
-        width: 20%;
+        width: calc(100vw/5);
         margin-left: 2.5%;
         margin-right: 2.5%;
     }
 
-    .main-container {
-        height: 70vh;
-        width: 95%;
-        margin: auto;
-    }
 
-    MudSelect {
-        height: 8vh;
-        margin-bottom: 2vh;
-        padding: 1em;
+    Label {
         color: black;
-        font-size: 1em;
         font-weight: 500;
-        font-family: opensans-condensed-light;
-        width: 80%;
-        margin-left: 10%;
-        margin-right: 10%;
-        line-height: 8vh;
+        font-size: 1.5em;
+        font-family: opensans-condensed-bold;
     }
 
     iframe {
-        height: inherit;
+        height: 70vh;
         width: inherit;
         margin-left: 2.5%;
     }
 
-    .button-div {
-        height: 5vh;
-        width: 50%;
-        margin: auto;
-    }
+
 
     .button-search {
-        background-color: #000000;
+        background-color: #003340;
         font-size: 1em;
         text-align: center;
         color: white;
+        width: 200px;
+        height: 5vh;
+        line-height: 5vh;
+        margin-right: 10px;
+        border: none;
+        border-radius: 20px;
+        font-family: opensans-condensed-bold;
     }
 </style>
 
 <div class="index-container">
     <div class="filter-container">
         <div class="filter">
-            <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Vendors" @bind-Value="Vendorvalue" @bind-SelectedValues="Vendoroptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetVendors))" Label="Vendors" AdornmentIcon="@Icons.Material.Filled.Search">
+            <MudSelect T="string" MultiSelection="true" Class="mudselect" SelectAll="true" SelectAllText="Select All Vendors" @bind-Value="Vendorvalue" @bind-SelectedValues="Vendoroptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetVendors))" Label="Vendors" AdornmentIcon="@Icons.Material.Filled.Search">
                 @foreach (var vendor in Vendors)
                 {
                     <MudSelectItem T="string" Value="@vendor">@vendor</MudSelectItem>
@@ -73,7 +87,7 @@
             </MudSelect>
         </div>
         <div class="filter">
-            <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Dates" @bind-Value="Datevalue" @bind-SelectedValues="Dateoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetDates))" Label="Dates" AdornmentIcon="@Icons.Material.Filled.Search">
+            <MudSelect T="string" MultiSelection="true" Class="mudselect" SelectAll="true" SelectAllText="Select All Dates" @bind-Value="Datevalue" @bind-SelectedValues="Dateoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetDates))" Label="Dates" AdornmentIcon="@Icons.Material.Filled.Search">
                 @foreach (var date in Dates)
                 {
                     <MudSelectItem T="string" Value="@date">@date</MudSelectItem>
@@ -81,7 +95,7 @@
             </MudSelect>
         </div>
         <div class="filter">
-            <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Subscriptions" @bind-Value="Subscriptionvalue" @bind-SelectedValues="Subscriptionoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetSubscriptions))" Label="Subscriptions" AdornmentIcon="@Icons.Material.Filled.Search">
+            <MudSelect T="string" MultiSelection="true" Class="mudselect" SelectAll="true" SelectAllText="Select All Subscriptions" @bind-Value="Subscriptionvalue" @bind-SelectedValues="Subscriptionoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetSubscriptions))" Label="Subscriptions" AdornmentIcon="@Icons.Material.Filled.Search">
                 @foreach (var subscription in Subscriptions)
                 {
                     <MudSelectItem T="string" Value="@subscription">@subscription</MudSelectItem>
@@ -89,7 +103,15 @@
             </MudSelect>
         </div>
         <div class="filter">
-            <MudSelect T="string" MultiSelection="true" SelectAll="true" SelectAllText="Select All Reource Groups" @bind-Value="ResourceGroupvalue" @bind-SelectedValues="ResourceGroupoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetResourceGroups))" Label="Resource Groups" AdornmentIcon="@Icons.Material.Filled.Search">
+            <MudSelect T="string" MultiSelection="true" Class="mudselect" SelectAll="true" SelectAllText="Select All Reource Groups" @bind-Value="ResourceGroupvalue" @bind-SelectedValues="ResourceGroupoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetResourceGroups))" Label="Resource Groups" AdornmentIcon="@Icons.Material.Filled.Search">
+                @foreach (var resourcegroup in ResourceGroups)
+                {
+                    <MudSelectItem T="string" Value="@resourcegroup">@resourcegroup</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+        <div class="filter">
+            <MudSelect T="string" MultiSelection="true" Class="mudselect" SelectAll="true" SelectAllText="Select All Reource Groups" @bind-Value="ResourceGroupvalue" @bind-SelectedValues="ResourceGroupoptions" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetResourceGroups))" Label="Project" AdornmentIcon="@Icons.Material.Filled.Search">
                 @foreach (var resourcegroup in ResourceGroups)
                 {
                     <MudSelectItem T="string" Value="@resourcegroup">@resourcegroup</MudSelectItem>
@@ -117,10 +139,10 @@
     private string Datevalue { get; set; } = "Select Date";
     private string ResourceGroupvalue { get; set; } = "Select Resource Group";
 
-    private IEnumerable<string> Vendoroptions; 
-    private IEnumerable<string> Dateoptions; 
-    private IEnumerable<string> Subscriptionoptions; 
-    private IEnumerable<string> ResourceGroupoptions; 
+    private IEnumerable<string> Vendoroptions;
+    private IEnumerable<string> Dateoptions;
+    private IEnumerable<string> Subscriptionoptions;
+    private IEnumerable<string> ResourceGroupoptions;
 
 
     private string selectedVendorsString;
@@ -128,7 +150,7 @@
     private string selectedSubscriptionsString;
     private string selectedDatesString;
 
-    private List<string> selectedVendors; 
+    private List<string> selectedVendors;
     private List<string> selectedResourceGroups;
     private List<string> selectedSubscriptions;
     private List<string> selectedDates;
@@ -140,7 +162,7 @@
 
     private string[] Dates =
     {
-        "27/12/2017", "03/01/2018", "19/01/2019"
+        "03-01-2018"
     };
     private string[] Subscriptions =
     {
