@@ -239,6 +239,7 @@
 
     private void BeginFilter()
     {
+        SomeClear();
         if (selectedVendors.Count() != 0)
         {
             buildVendorFilter();
@@ -302,7 +303,7 @@
             }
 
         }
-
+        Console.WriteLine(mainfilter);
         link = link + filterstart + mainfilter;
     }
 
@@ -443,6 +444,13 @@
             }
         }
     }
+
+    private async Task SomeClear()
+    {
+        mainfilter = "";
+        link = mainlink;
+    }
+
     private async Task Clear()
     {
         mainfilter = "";
